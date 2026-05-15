@@ -3,121 +3,136 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Gym ERP Futuristic</title>
+<title>Gym SaaS Pro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body {
   margin:0;
   font-family: Inter, Segoe UI;
-  display:flex;
-  background: linear-gradient(135deg,#020617,#1e1b4b);
-  color:#e2e8f0;
+  background:#0b0f1a;
+  color:#e5e7eb;
 }
 
-/* Sidebar */
+/* Layout */
+.app { display:flex; height:100vh; }
+
 .sidebar {
-  width:240px;
-  background:rgba(2,6,23,0.85);
-  backdrop-filter: blur(12px);
-  padding:20px;
-  height:100vh;
-  border-right:1px solid rgba(255,255,255,0.05);
+  width:220px;
+  background:#020617;
+  padding:15px;
+  border-right:1px solid #1f2937;
 }
 
 .sidebar h2 {
-  background:linear-gradient(90deg,#38bdf8,#a78bfa);
-  -webkit-background-clip:text;
-  color:transparent;
+  color:#38bdf8;
 }
 
 .sidebar button {
   width:100%;
-  padding:12px;
-  margin:6px 0;
-  background:transparent;
-  border:1px solid rgba(255,255,255,0.08);
+  padding:10px;
+  margin:5px 0;
+  background:none;
+  border:none;
   color:#cbd5f5;
+  text-align:left;
   cursor:pointer;
-  border-radius:10px;
-  transition:0.2s;
+  border-radius:6px;
 }
 
 .sidebar button:hover {
-  background:linear-gradient(90deg,#38bdf8,#a78bfa);
-  color:black;
+  background:#1e293b;
 }
 
 /* Main */
-.main { flex:1; padding:20px; }
+.main { flex:1; display:flex; flex-direction:column; }
 
-/* Cards */
-.card {
-  background:rgba(30,41,59,0.5);
-  backdrop-filter: blur(14px);
-  padding:16px;
-  border-radius:14px;
-  margin-bottom:15px;
-  border:1px solid rgba(255,255,255,0.06);
-  box-shadow:0 0 25px rgba(167,139,250,0.08);
+.topbar {
+  padding:12px 20px;
+  border-bottom:1px solid #1f2937;
+  display:flex;
+  justify-content:space-between;
 }
 
+.content {
+  padding:15px;
+  overflow:auto;
+}
+
+/* Dashboard cards */
 .grid {
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:12px;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
 }
 
-.stat {
-  font-size:22px;
-  font-weight:bold;
-  margin-top:5px;
-}
-
-/* Inputs */
-input, select {
-  width:100%;
-  padding:10px;
-  margin:6px 0;
-  border-radius:10px;
-  border:none;
+.card {
   background:#020617;
-  color:white;
-}
-
-/* Buttons */
-button.action {
-  padding:6px 10px;
-  margin:3px;
-  border:none;
+  padding:12px;
   border-radius:8px;
-  cursor:pointer;
-  font-size:12px;
+  border:1px solid #1f2937;
 }
 
-.green { background:#22c55e; }
-.red { background:#ef4444; }
-.yellow { background:#f59e0b; }
+.card p {
+  font-size:20px;
+  margin:5px 0;
+}
 
-.badge {
-  padding:4px 10px;
-  border-radius:20px;
+/* Table */
+table {
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+
+th, td {
+  padding:8px;
+  border-bottom:1px solid #1f2937;
+}
+
+th {
+  color:#9ca3af;
+  text-transform:uppercase;
   font-size:11px;
 }
 
-/* Client card */
-.client {
-  background:rgba(2,6,23,0.9);
-  padding:12px;
-  border-radius:12px;
-  margin-top:10px;
-  border:1px solid rgba(255,255,255,0.05);
-  transition:0.2s;
+/* Badges */
+.badge {
+  padding:2px 6px;
+  border-radius:6px;
+  font-size:11px;
 }
 
-.client:hover {
-  transform:translateY(-2px);
-  box-shadow:0 0 15px rgba(56,189,248,0.2);
+.green { background:#16a34a; }
+.red { background:#dc2626; }
+.yellow { background:#ca8a04; }
+
+/* Buttons */
+button.action {
+  padding:4px 6px;
+  font-size:11px;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+  margin:1px;
+}
+
+.check { background:#22c55e; }
+.delete { background:#ef4444; }
+
+/* Inputs */
+input, select {
+  padding:6px;
+  margin:3px;
+  background:#020617;
+  border:1px solid #1f2937;
+  color:white;
+  border-radius:5px;
+}
+
+/* Highlight row */
+tr:hover {
+  background:#111827;
 }
 </style>
 
@@ -125,27 +140,37 @@ button.action {
 
 <body>
 
+<div class="app">
+
 <div class="sidebar">
-<h2>⚡ Gym ERP</h2>
+<h2>⚡ Gym</h2>
 <button onclick="show('dashboard')">Dashboard</button>
 <button onclick="show('clients')">Clients</button>
-<button onclick="show('attendance')">Attendance</button>
-<button onclick="show('payments')">Payments</button>
 <button onclick="show('workouts')">Workouts</button>
 </div>
 
-<div class="main" id="content"></div>
+<div class="main">
+<div class="topbar">
+<div>Gym ERP</div>
+<div>Admin</div>
+</div>
+
+<div class="content" id="content"></div>
+</div>
+
+</div>
 
 <script>
 
-/* SAMPLE DATA */
-let clients = JSON.parse(localStorage.getItem("gym_proto")) || [
-  {name:"Rahul",phone:"9876543210",fee:2000,expiry:new Date(Date.now()+5*86400000),attendance:["Mon","Tue"]},
-  {name:"Arjun",phone:"9123456780",fee:1500,expiry:new Date(Date.now()-2*86400000),attendance:["Mon"]},
-  {name:"Kiran",phone:"9000000000",fee:2500,expiry:new Date(Date.now()+1*86400000),attendance:["Mon","Tue","Wed"]}
+let clients = JSON.parse(localStorage.getItem("gym_pro")) || [
+  {name:"Rahul",phone:"9876",fee:2000,expiry:new Date(Date.now()+5*86400000),attendance:2},
+  {name:"Arjun",phone:"9123",fee:1500,expiry:new Date(Date.now()-2*86400000),attendance:1},
+  {name:"Kiran",phone:"9000",fee:2500,expiry:new Date(Date.now()+1*86400000),attendance:3}
 ];
 
-function save(){ localStorage.setItem("gym_proto", JSON.stringify(clients)); }
+function save(){
+  localStorage.setItem("gym_pro", JSON.stringify(clients));
+}
 
 function status(exp){
   let d=(new Date(exp)-new Date())/(1000*60*60*24);
@@ -156,99 +181,83 @@ function status(exp){
 
 /* Dashboard */
 function dashboard(){
-let total=clients.length;
 let revenue=clients.reduce((a,c)=>a+c.fee,0);
-let expired=clients.filter(c=>status(c.expiry)[0]=="Expired").length;
 
 return `
-<h2>Dashboard</h2>
 <div class="grid">
-<div class="card">Clients<div class="stat">${total}</div></div>
-<div class="card">Revenue<div class="stat">₹${revenue}</div></div>
-<div class="card">Expired<div class="stat">${expired}</div></div>
-<div class="card">Today<div class="stat">${new Date().toLocaleDateString()}</div></div>
+<div class="card">Clients<p>${clients.length}</p></div>
+<div class="card">Revenue<p>₹${revenue}</p></div>
+<div class="card">Expired<p>${clients.filter(c=>status(c.expiry)[0]=="Expired").length}</p></div>
+<div class="card">Today<p>${new Date().toLocaleDateString()}</p></div>
 </div>`;
 }
 
-/* Clients */
+/* Clients (Dense Table) */
 function clientsPage(){
 return `
-<h2>Clients</h2>
-
-<div class="card">
+<h3>Add Client</h3>
 <input id="name" placeholder="Name">
 <input id="phone" placeholder="Phone">
-<select id="plan">
-<option value="30">Monthly</option>
-<option value="90">3 Months</option>
-<option value="365">Yearly</option>
-</select>
+<input id="fee" type="number" placeholder="Fee">
+<input type="date" id="date">
+<button onclick="add()">Add</button>
 
-<input type="date" id="customDate">
-<input id="fee" type="number" placeholder="Fee ₹">
+<h3>Clients</h3>
+<table>
+<tr>
+<th>Name</th><th>Phone</th><th>Fee</th><th>Expiry</th><th>Status</th><th>Visits</th><th>Actions</th>
+</tr>
 
-<button onclick="add()">Add Client</button>
-</div>
-
-<div class="card">
 ${clients.map((c,i)=>{
 let [s,color]=status(c.expiry);
 return `
-<div class="client">
-<b>${c.name}</b> (${c.phone})
-<span class="badge ${color}">${s}</span><br>
-Expiry: ${new Date(c.expiry).toLocaleDateString()}<br>
-
-<button class="action green" onclick="checkin(${i})">Check-in</button>
-<button class="action red" onclick="del(${i})">Delete</button>
-
-<div style="font-size:12px;">Visits: ${c.attendance.length}</div>
-</div>`;
+<tr>
+<td>${c.name}</td>
+<td>${c.phone}</td>
+<td>₹${c.fee}</td>
+<td>${new Date(c.expiry).toLocaleDateString()}</td>
+<td><span class="badge ${color}">${s}</span></td>
+<td>${c.attendance}</td>
+<td>
+<button class="action check" onclick="checkin(${i})">✓</button>
+<button class="action delete" onclick="del(${i})">X</button>
+</td>
+</tr>`;
 }).join("")}
-</div>`;
+
+</table>`;
 }
 
-/* Other Pages */
-function attendancePage(){
-return `<h2>Attendance</h2><div class="card">
-${clients.map(c=>`${c.name} → ${c.attendance.length} visits<br>`).join("")}
-</div>`;
-}
-
-function paymentsPage(){
-return `<h2>Payments</h2><div class="card">
-${clients.map(c=>`${c.name} → ₹${c.fee} → ${new Date(c.expiry).toLocaleDateString()}<br>`).join("")}
-</div>`;
-}
-
+/* Workouts */
 function workoutsPage(){
-return `<h2>Workouts</h2>
+return `
+<h3>Workout Reference</h3>
 <div class="card">Chest → Bench, Incline, Fly, Pushups, Dips</div>
-<div class="card">Back → Pullups, Rows, Deadlift, Lat Pulldown</div>
-<div class="card">Legs → Squats, Lunges, Press, Curl, Calf</div>
-<div class="card">Shoulders → Press, Lateral, Front, Rear, Shrugs</div>
-<div class="card">Arms → Curl, Hammer, Pushdown, Skull</div>`;
+<div class="card">Back → Pullups, Rows, Deadlift</div>
+<div class="card">Legs → Squats, Lunges, Press</div>`;
 }
 
 /* Actions */
 function add(){
-let name=document.getElementById("name").value;
-let phone=document.getElementById("phone").value;
-let plan=parseInt(document.getElementById("plan").value);
-let fee=parseInt(document.getElementById("fee").value);
-let custom=document.getElementById("customDate").value;
+let name=name.value;
+let phone=phone.value;
+let fee=parseInt(fee.value);
+let date=date.value;
 
-if(!name||!fee) return alert("Enter details");
+if(!name||!fee) return;
 
-let exp=custom?new Date(custom):new Date(Date.now()+plan*86400000);
+clients.push({
+name,phone,fee,
+expiry:new Date(date||Date.now()+30*86400000),
+attendance:0
+});
 
-clients.push({name,phone,fee,expiry:exp,attendance:[]});
 save();
 show('clients');
 }
 
 function checkin(i){
-clients[i].attendance.push(new Date().toDateString());
+clients[i].attendance++;
 save();
 show('clients');
 }
@@ -261,14 +270,9 @@ show('clients');
 
 /* Nav */
 function show(p){
-let html="";
-if(p=="dashboard") html=dashboard();
-if(p=="clients") html=clientsPage();
-if(p=="attendance") html=attendancePage();
-if(p=="payments") html=paymentsPage();
-if(p=="workouts") html=workoutsPage();
-
-document.getElementById("content").innerHTML=html;
+if(p=="dashboard") content.innerHTML=dashboard();
+if(p=="clients") content.innerHTML=clientsPage();
+if(p=="workouts") content.innerHTML=workoutsPage();
 }
 
 show('dashboard');
