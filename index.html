@@ -3,23 +3,58 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Gym ERP Prototype</title>
+<title>Gym ERP Futuristic</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body { margin:0; font-family:Segoe UI; display:flex; background:#0f172a; color:#fff; }
-.sidebar { width:240px; background:#020617; padding:20px; height:100vh; }
-.sidebar h2 { margin-bottom:20px; }
-.sidebar button {
-  width:100%; padding:12px; margin:6px 0;
-  background:#1e293b; border:none; color:white;
-  cursor:pointer; border-radius:8px;
+body {
+  margin:0;
+  font-family:Segoe UI;
+  display:flex;
+  background:linear-gradient(135deg,#020617,#0f172a);
+  color:#e2e8f0;
 }
+
+/* Sidebar */
+.sidebar {
+  width:240px;
+  background:rgba(15,23,42,0.9);
+  backdrop-filter: blur(10px);
+  padding:20px;
+  height:100vh;
+  border-right:1px solid rgba(255,255,255,0.05);
+}
+
+.sidebar h2 { color:#38bdf8; }
+
+.sidebar button {
+  width:100%;
+  padding:12px;
+  margin:6px 0;
+  background:transparent;
+  border:1px solid rgba(255,255,255,0.1);
+  color:white;
+  cursor:pointer;
+  border-radius:8px;
+  transition:0.2s;
+}
+
+.sidebar button:hover {
+  background:#38bdf8;
+  color:black;
+}
+
+/* Main */
 .main { flex:1; padding:20px; }
 
 .card {
-  background:#1e293b; padding:15px;
-  border-radius:12px; margin-bottom:15px;
+  background:rgba(30,41,59,0.6);
+  backdrop-filter: blur(12px);
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:15px;
+  border:1px solid rgba(255,255,255,0.05);
+  box-shadow:0 0 20px rgba(56,189,248,0.1);
 }
 
 .grid {
@@ -29,13 +64,21 @@ body { margin:0; font-family:Segoe UI; display:flex; background:#0f172a; color:#
 }
 
 input, select {
-  width:100%; padding:10px; margin:6px 0;
-  border-radius:8px; border:none;
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  border-radius:8px;
+  border:none;
+  background:#020617;
+  color:white;
 }
 
 button.action {
-  padding:6px 10px; margin:3px;
-  border:none; border-radius:6px; cursor:pointer;
+  padding:6px 10px;
+  margin:3px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
 }
 
 .green { background:#22c55e; }
@@ -50,9 +93,10 @@ button.action {
 
 .client {
   background:#020617;
-  padding:10px;
+  padding:12px;
   border-radius:10px;
   margin-top:10px;
+  border:1px solid rgba(255,255,255,0.05);
 }
 </style>
 
@@ -61,7 +105,7 @@ button.action {
 <body>
 
 <div class="sidebar">
-<h2>🏋️ Gym ERP</h2>
+<h2>⚡ Gym ERP</h2>
 <button onclick="show('dashboard')">Dashboard</button>
 <button onclick="show('clients')">Clients</button>
 <button onclick="show('attendance')">Attendance</button>
@@ -72,7 +116,31 @@ button.action {
 <div class="main" id="content"></div>
 
 <script>
-let clients = JSON.parse(localStorage.getItem("gym_proto")) || [];
+
+/* SAMPLE DATA */
+let clients = JSON.parse(localStorage.getItem("gym_proto")) || [
+  {
+    name:"Rahul",
+    phone:"9876543210",
+    fee:2000,
+    expiry:new Date(Date.now()+5*86400000),
+    attendance:["Mon","Tue"]
+  },
+  {
+    name:"Arjun",
+    phone:"9123456780",
+    fee:1500,
+    expiry:new Date(Date.now()-2*86400000),
+    attendance:["Mon"]
+  },
+  {
+    name:"Kiran",
+    phone:"9000000000",
+    fee:2500,
+    expiry:new Date(Date.now()+1*86400000),
+    attendance:["Mon","Tue","Wed"]
+  }
+];
 
 function save(){
   localStorage.setItem("gym_proto", JSON.stringify(clients));
@@ -109,14 +177,13 @@ return `
 <div class="card">
 <input id="name" placeholder="Name">
 <input id="phone" placeholder="Phone">
-
 <select id="plan">
 <option value="30">Monthly</option>
 <option value="90">3 Months</option>
 <option value="365">Yearly</option>
 </select>
 
-<label>OR Select Custom Expiry Date</label>
+<label>Custom Expiry</label>
 <input type="date" id="customDate">
 
 <input id="fee" type="number" placeholder="Fee ₹">
@@ -128,7 +195,7 @@ ${clients.map((c,i)=>{
 let [s,color]=status(c.expiry);
 return `
 <div class="client">
-<b>${c.name}</b> (${c.phone || "-"}) 
+<b>${c.name}</b> (${c.phone})
 <span class="badge ${color}">${s}</span><br>
 Expiry: ${new Date(c.expiry).toLocaleDateString()}<br>
 
@@ -162,27 +229,22 @@ ${clients.map(c=>`${c.name} → ₹${c.fee} → ${new Date(c.expiry).toLocaleDat
 /* Workouts */
 function workoutsPage(){
 return `
-<h2>Workout Plans</h2>
+<h2>Workouts</h2>
 
 <div class="card"><b>Chest</b><br>
-Bench Press<br>Incline Press<br>Chest Fly<br>Push-ups<br>Dips
-</div>
+Bench Press, Incline Press, Fly, Pushups, Dips</div>
 
 <div class="card"><b>Back</b><br>
-Pull-ups<br>Lat Pulldown<br>Barbell Row<br>Deadlift<br>Seated Row
-</div>
+Pull-ups, Rows, Deadlift, Lat Pulldown, Cable Row</div>
 
 <div class="card"><b>Legs</b><br>
-Squats<br>Lunges<br>Leg Press<br>Hamstring Curl<br>Calf Raises
-</div>
+Squats, Lunges, Leg Press, Curl, Calf Raise</div>
 
 <div class="card"><b>Shoulders</b><br>
-Overhead Press<br>Lateral Raise<br>Front Raise<br>Rear Delt Fly<br>Shrugs
-</div>
+Press, Lateral Raise, Front Raise, Rear Fly, Shrugs</div>
 
 <div class="card"><b>Arms</b><br>
-Bicep Curl<br>Hammer Curl<br>Tricep Pushdown<br>Skull Crushers<br>Dips
-</div>`;
+Curls, Hammer, Pushdown, Skull Crushers, Dips</div>`;
 }
 
 /* Actions */
@@ -195,14 +257,7 @@ let customDate = document.getElementById("customDate").value;
 
 if(!name || !fee) return alert("Enter details");
 
-let exp;
-
-if(customDate){
-  exp = new Date(customDate);
-} else {
-  exp = new Date();
-  exp.setDate(exp.getDate()+plan);
-}
+let exp = customDate ? new Date(customDate) : new Date(Date.now()+plan*86400000);
 
 clients.push({name,phone,fee,expiry:exp,attendance:[]});
 save();
