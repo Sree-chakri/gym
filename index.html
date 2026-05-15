@@ -103,13 +103,20 @@ button.action {
 .check { background:#22c55e; }
 .delete { background:#ef4444; }
 
+/* ✅ UPDATED INPUT STYLE */
 input, select {
   padding:6px;
   margin:3px;
-  background:#97c7fc;
-  border:1px solid #1f2937;
-  color:white;
+  background:#000;
+  border:1px solid #00f0ff;
+  color:#fff;
   border-radius:5px;
+  outline:none;
+}
+
+input:focus, select:focus {
+  box-shadow:0 0 8px #00f0ff;
+  border-color:#00f0ff;
 }
 
 tr:hover { background:#111827; }
