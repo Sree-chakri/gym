@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Gym Manager</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin:0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg,#1f1f1f,#3a3a3a);
+  color:white;
+}
+
+.container {
+  max-width:900px;
+  margin:auto;
+  padding:20px;
+}
+
+h1 {
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.card {
+  background:#2b2b2b;
+  padding:15px;
+  margin:15px 0;
+  border-radius:12px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.4);
+}
+
+input {
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:8px;
+  border:none;
+}
+
+button {
+  width:100%;
+  padding:10px;
+  background:#00c853;
+  border:none;
+  color:white;
+  border-radius:8px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button:hover {
+  background:#00e676;
+}
+
+.client {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#1f1f1f;
+  padding:10px;
+  border-radius:8px;
+  margin-top:10px;
+}
+
+.small {
+  font-size:13px;
+  color:#bbb;
+}
+
+.paid {
+  background:#00c853;
+}
+
+.unpaid {
+  background:#d50000;
+}
+
+.badge {
+  padding:5px 10px;
+  border-radius:20px;
+  font-size:12px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+<h1>🏋️ Gym Manager</h1>
+
+<div class="card">
+<h3>Add Client</h3>
+<input id="name" placeholder="Client Name">
+<input id="fee" placeholder="Monthly Fee (₹)">
+<button onclick="addClient()">Add Client</button>
+</div>
+
+<div class="card">
+<h3>Clients</h3>
+<div id="clients"></div>
+</div>
+
+<div class="card">
+<h3>Beginner Workout Plan</h3>
+<ul class="small">
+<li>Day 1: Chest + Triceps</li>
+<li>Day 2: Back + Biceps</li>
+<li>Day 3: Legs</li>
+<li>Day 4: Shoulders + Core</li>
+<li>Day 5: Cardio + Abs</li>
+</ul>
+</div>
+
+</div>
+
+<script>
+let clients = JSON.parse(localStorage.getItem("clients")) || [];
+
+function save() {
+  localStorage.setItem("clients", JSON.stringify(clients));
+}
+
+function addClient(){
+  let name = document.getElementById("name").value;
+  let fee = document.getElementById("fee").value;
+
+  if(!name || !fee) return;
+
+  clients.push({name, fee, paid:false});
+  save();
+  render();
+}
+
+function toggle(index){
+  clients[index].paid = !clients[index].paid;
+  save();
+  render();
+}
+
+function render(){
+  let list = document.getElementById("clients");
+  list.innerHTML = "";
+
+  clients.forEach((c,i)=>{
+    list.innerHTML += `
+    <div class="client">
+      <div>
+        <b>${c.name}</b><br>
+        <span class="small">Fee: ₹${c.fee}</span>
+      </div>
+      <div>
+        <span class="badge ${c.paid ? 'paid':'unpaid'}">
+          ${c.paid ? 'Paid':'Unpaid'}
+        </span>
+        <button onclick="toggle(${i})" style="margin-top:5px;">
+          Toggle
+        </button>
+      </div>
+    </div>`;
+  });
+}
+
+render();
+</script>
+
+</body>
+</html>
