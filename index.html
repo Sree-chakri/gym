@@ -7,72 +7,127 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body { margin:0; font-family:Segoe UI; background:#121212; color:#fff; }
-.container { max-width:1000px; margin:auto; padding:20px; }
-h1 { text-align:center; }
+body {
+  margin:0;
+  font-family: 'Segoe UI', sans-serif;
+  background:#0f172a;
+  color:#fff;
+}
+
+.container {
+  max-width:1100px;
+  margin:auto;
+  padding:20px;
+}
+
+h1 {
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+  gap:15px;
+}
 
 .card {
-  background:#1e1e1e;
+  background:#1e293b;
   padding:15px;
-  margin:15px 0;
   border-radius:12px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.3);
 }
 
-input, select, button {
-  width:100%; padding:10px; margin:6px 0;
-  border-radius:8px; border:none;
+input, select {
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  border-radius:8px;
+  border:none;
 }
 
-button { background:#00c853; color:white; cursor:pointer; }
+button {
+  padding:8px 12px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.add-btn {
+  width:100%;
+  background:#22c55e;
+  color:white;
+  font-weight:bold;
+}
 
 .client {
-  background:#2a2a2a;
-  padding:10px;
+  background:#1e293b;
+  padding:12px;
   border-radius:10px;
   margin-top:10px;
 }
 
-.badge { padding:4px 10px; border-radius:20px; font-size:12px; }
-.green { background:#00c853; }
-.red { background:#d50000; }
-.yellow { background:#ffab00; }
+.flex {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
 
-.flex { display:flex; justify-content:space-between; align-items:center; }
-.small { font-size:12px; color:#bbb; }
+.badge {
+  padding:4px 10px;
+  border-radius:20px;
+  font-size:12px;
+}
+
+.green { background:#22c55e; }
+.red { background:#ef4444; }
+.yellow { background:#f59e0b; }
+
+.small { font-size:12px; color:#cbd5f5; }
+
+.actions button {
+  margin-left:5px;
+}
 </style>
 
 </head>
 
 <body>
-<div class="container">
 
+<div class="container">
 <h1>🏋️ Gym Manager Pro</h1>
+
+<!-- Dashboard -->
+
+<div class="grid">
+<div class="card">Total Clients: <b id="total"></b></div>
+<div class="card">Active: <b id="active"></b></div>
+<div class="card">Expired: <b id="expired"></b></div>
+<div class="card">Revenue: ₹<b id="revenue"></b></div>
+</div>
+
+<!-- Add Client -->
 
 <div class="card">
 <h3>Add Client</h3>
-<input id="name" placeholder="Name">
-<input id="phone" placeholder="Phone">
-<select id="plan">
+<input id="nameInput" placeholder="Name">
+<input id="phoneInput" placeholder="Phone">
+<select id="planInput">
   <option value="30">Monthly</option>
   <option value="90">3 Months</option>
   <option value="365">Yearly</option>
 </select>
-<input type="number" id="fee" placeholder="Fee ₹">
-<button onclick="addClient()">Add Client</button>
+<input id="feeInput" type="number" placeholder="Fee ₹">
+<button class="add-btn" onclick="addClient()">Add Client</button>
 </div>
 
-<div class="card">
-<h3>Dashboard</h3>
-<p>Total Clients: <span id="total"></span></p>
-<p>Active: <span id="active"></span></p>
-<p>Expired: <span id="expired"></span></p>
-<p>Revenue: ₹<span id="revenue"></span></p>
-</div>
+<!-- Search -->
 
 <div class="card">
-<h3>Search</h3>
-<input id="search" placeholder="Search name..." oninput="render()">
+<input id="search" placeholder="Search client..." oninput="render()">
 </div>
+
+<!-- Clients -->
 
 <div class="card">
 <h3>Clients</h3>
@@ -82,93 +137,106 @@ button { background:#00c853; color:white; cursor:pointer; }
 </div>
 
 <script>
-let clients = JSON.parse(localStorage.getItem("clients_v2")) || [];
+let clients = JSON.parse(localStorage.getItem("gym_clients")) || [];
 
 function save(){
-localStorage.setItem("clients_v2", JSON.stringify(clients));
+  localStorage.setItem("gym_clients", JSON.stringify(clients));
 }
 
 function addClient(){
-let name = name.value;
-let phone = phone.value;
-let plan = parseInt(plan.value);
-let fee = parseInt(fee.value);
+  let name = document.getElementById("nameInput").value;
+  let phone = document.getElementById("phoneInput").value;
+  let plan = parseInt(document.getElementById("planInput").value);
+  let fee = parseInt(document.getElementById("feeInput").value);
 
-if(!name || !fee) return;
+  if(!name || !fee){
+    alert("Enter required fields");
+    return;
+  }
 
-let join = new Date();
-let expiry = new Date();
-expiry.setDate(join.getDate() + plan);
+  let join = new Date();
+  let expiry = new Date();
+  expiry.setDate(join.getDate() + plan);
 
-clients.push({
-name, phone, fee, join, expiry,
-attendance: []
-});
+  clients.push({
+    name, phone, fee,
+    expiry,
+    attendance:[]
+  });
 
-save();
-render();
+  save();
+  render();
 }
 
 function getStatus(expiry){
-let now = new Date();
-let exp = new Date(expiry);
-let diff = (exp - now)/(1000*60*60*24);
+  let now = new Date();
+  let exp = new Date(expiry);
+  let diff = (exp - now)/(1000*60*60*24);
 
-if(diff < 0) return ["Expired","red"];
-if(diff < 3) return ["Due Soon","yellow"];
-return ["Active","green"];
+  if(diff < 0) return ["Expired","red"];
+  if(diff < 3) return ["Due Soon","yellow"];
+  return ["Active","green"];
 }
 
 function markAttendance(i){
-let today = new Date().toDateString();
-if(!clients[i].attendance.includes(today)){
-clients[i].attendance.push(today);
-save();
-render();
+  let today = new Date().toDateString();
+  if(!clients[i].attendance.includes(today)){
+    clients[i].attendance.push(today);
+    save();
+    render();
+  }
 }
+
+function deleteClient(i){
+  if(confirm("Delete client?")){
+    clients.splice(i,1);
+    save();
+    render();
+  }
 }
 
 function render(){
-let list = document.getElementById("clients");
-let search = document.getElementById("search").value.toLowerCase();
+  let list = document.getElementById("clients");
+  let search = document.getElementById("search").value.toLowerCase();
 
-list.innerHTML = "";
+  list.innerHTML = "";
 
-let total=0, active=0, expired=0, revenue=0;
+  let total=0, active=0, expired=0, revenue=0;
 
-clients.forEach((c,i)=>{
-if(!c.name.toLowerCase().includes(search)) return;
+  clients.forEach((c,i)=>{
+    if(!c.name.toLowerCase().includes(search)) return;
 
-total++;
-revenue += c.fee;
+    total++;
+    revenue += c.fee;
 
-let [status,color] = getStatus(c.expiry);
-if(status==="Expired") expired++; else active++;
+    let [status,color] = getStatus(c.expiry);
+    if(status==="Expired") expired++; else active++;
 
-list.innerHTML += `
-<div class="client">
-<div class="flex">
-<div>
-<b>${c.name}</b><br>
-<span class="small">${c.phone}</span><br>
-<span class="small">Expiry: ${new Date(c.expiry).toLocaleDateString()}</span>
-</div>
-<div>
-<span class="badge ${color}">${status}</span>
-</div>
-</div>
+    list.innerHTML += `
+    <div class="client">
+      <div class="flex">
+        <div>
+          <b>${c.name}</b><br>
+          <span class="small">${c.phone || ""}</span><br>
+          <span class="small">Expiry: ${new Date(c.expiry).toLocaleDateString()}</span>
+        </div>
+        <span class="badge ${color}">${status}</span>
+      </div>
 
-<div class="flex" style="margin-top:10px;">
-<button onclick="markAttendance(${i})">Check-in</button>
-<span class="small">Visits: ${c.attendance.length}</span>
-</div>
-</div>`;
-});
+      <div class="flex actions" style="margin-top:10px;">
+        <div>
+          <button onclick="markAttendance(${i})">Check-in</button>
+          <button onclick="deleteClient(${i})" style="background:#ef4444;color:white;">Delete</button>
+        </div>
+        <span class="small">Visits: ${c.attendance.length}</span>
+      </div>
+    </div>`;
+  });
 
-document.getElementById("total").innerText = total;
-document.getElementById("active").innerText = active;
-document.getElementById("expired").innerText = expired;
-document.getElementById("revenue").innerText = revenue;
+  document.getElementById("total").innerText = total;
+  document.getElementById("active").innerText = active;
+  document.getElementById("expired").innerText = expired;
+  document.getElementById("revenue").innerText = revenue;
 }
 
 render();
