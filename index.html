@@ -3,101 +3,75 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Gym Manager</title>
+<title>Gym Manager Pro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body {
-  margin:0;
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg,#1f1f1f,#3a3a3a);
-  color:white;
-}
-
-.container {
-  max-width:900px;
-  margin:auto;
-  padding:20px;
-}
-
-h1 {
-  text-align:center;
-  margin-bottom:20px;
-}
+body { margin:0; font-family:Segoe UI; background:#121212; color:#fff; }
+.container { max-width:1000px; margin:auto; padding:20px; }
+h1 { text-align:center; }
 
 .card {
-  background:#2b2b2b;
+  background:#1e1e1e;
   padding:15px;
   margin:15px 0;
   border-radius:12px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.4);
 }
 
-input {
-  width:100%;
-  padding:10px;
-  margin:8px 0;
-  border-radius:8px;
-  border:none;
+input, select, button {
+  width:100%; padding:10px; margin:6px 0;
+  border-radius:8px; border:none;
 }
 
-button {
-  width:100%;
-  padding:10px;
-  background:#00c853;
-  border:none;
-  color:white;
-  border-radius:8px;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-button:hover {
-  background:#00e676;
-}
+button { background:#00c853; color:white; cursor:pointer; }
 
 .client {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  background:#1f1f1f;
+  background:#2a2a2a;
   padding:10px;
-  border-radius:8px;
+  border-radius:10px;
   margin-top:10px;
 }
 
-.small {
-  font-size:13px;
-  color:#bbb;
-}
+.badge { padding:4px 10px; border-radius:20px; font-size:12px; }
+.green { background:#00c853; }
+.red { background:#d50000; }
+.yellow { background:#ffab00; }
 
-.paid {
-  background:#00c853;
-}
-
-.unpaid {
-  background:#d50000;
-}
-
-.badge {
-  padding:5px 10px;
-  border-radius:20px;
-  font-size:12px;
-}
+.flex { display:flex; justify-content:space-between; align-items:center; }
+.small { font-size:12px; color:#bbb; }
 </style>
 
 </head>
 
 <body>
-
 <div class="container">
-<h1>🏋️ Gym Manager</h1>
+
+<h1>🏋️ Gym Manager Pro</h1>
 
 <div class="card">
 <h3>Add Client</h3>
-<input id="name" placeholder="Client Name">
-<input id="fee" placeholder="Monthly Fee (₹)">
+<input id="name" placeholder="Name">
+<input id="phone" placeholder="Phone">
+<select id="plan">
+  <option value="30">Monthly</option>
+  <option value="90">3 Months</option>
+  <option value="365">Yearly</option>
+</select>
+<input type="number" id="fee" placeholder="Fee ₹">
 <button onclick="addClient()">Add Client</button>
+</div>
+
+<div class="card">
+<h3>Dashboard</h3>
+<p>Total Clients: <span id="total"></span></p>
+<p>Active: <span id="active"></span></p>
+<p>Expired: <span id="expired"></span></p>
+<p>Revenue: ₹<span id="revenue"></span></p>
+</div>
+
+<div class="card">
+<h3>Search</h3>
+<input id="search" placeholder="Search name..." oninput="render()">
 </div>
 
 <div class="card">
@@ -105,64 +79,96 @@ button:hover {
 <div id="clients"></div>
 </div>
 
-<div class="card">
-<h3>Beginner Workout Plan</h3>
-<ul class="small">
-<li>Day 1: Chest + Triceps</li>
-<li>Day 2: Back + Biceps</li>
-<li>Day 3: Legs</li>
-<li>Day 4: Shoulders + Core</li>
-<li>Day 5: Cardio + Abs</li>
-</ul>
-</div>
-
 </div>
 
 <script>
-let clients = JSON.parse(localStorage.getItem("clients")) || [];
+let clients = JSON.parse(localStorage.getItem("clients_v2")) || [];
 
-function save() {
-  localStorage.setItem("clients", JSON.stringify(clients));
+function save(){
+localStorage.setItem("clients_v2", JSON.stringify(clients));
 }
 
 function addClient(){
-  let name = document.getElementById("name").value;
-  let fee = document.getElementById("fee").value;
+let name = name.value;
+let phone = phone.value;
+let plan = parseInt(plan.value);
+let fee = parseInt(fee.value);
 
-  if(!name || !fee) return;
+if(!name || !fee) return;
 
-  clients.push({name, fee, paid:false});
-  save();
-  render();
+let join = new Date();
+let expiry = new Date();
+expiry.setDate(join.getDate() + plan);
+
+clients.push({
+name, phone, fee, join, expiry,
+attendance: []
+});
+
+save();
+render();
 }
 
-function toggle(index){
-  clients[index].paid = !clients[index].paid;
-  save();
-  render();
+function getStatus(expiry){
+let now = new Date();
+let exp = new Date(expiry);
+let diff = (exp - now)/(1000*60*60*24);
+
+if(diff < 0) return ["Expired","red"];
+if(diff < 3) return ["Due Soon","yellow"];
+return ["Active","green"];
+}
+
+function markAttendance(i){
+let today = new Date().toDateString();
+if(!clients[i].attendance.includes(today)){
+clients[i].attendance.push(today);
+save();
+render();
+}
 }
 
 function render(){
-  let list = document.getElementById("clients");
-  list.innerHTML = "";
+let list = document.getElementById("clients");
+let search = document.getElementById("search").value.toLowerCase();
 
-  clients.forEach((c,i)=>{
-    list.innerHTML += `
-    <div class="client">
-      <div>
-        <b>${c.name}</b><br>
-        <span class="small">Fee: ₹${c.fee}</span>
-      </div>
-      <div>
-        <span class="badge ${c.paid ? 'paid':'unpaid'}">
-          ${c.paid ? 'Paid':'Unpaid'}
-        </span>
-        <button onclick="toggle(${i})" style="margin-top:5px;">
-          Toggle
-        </button>
-      </div>
-    </div>`;
-  });
+list.innerHTML = "";
+
+let total=0, active=0, expired=0, revenue=0;
+
+clients.forEach((c,i)=>{
+if(!c.name.toLowerCase().includes(search)) return;
+
+total++;
+revenue += c.fee;
+
+let [status,color] = getStatus(c.expiry);
+if(status==="Expired") expired++; else active++;
+
+list.innerHTML += `
+<div class="client">
+<div class="flex">
+<div>
+<b>${c.name}</b><br>
+<span class="small">${c.phone}</span><br>
+<span class="small">Expiry: ${new Date(c.expiry).toLocaleDateString()}</span>
+</div>
+<div>
+<span class="badge ${color}">${status}</span>
+</div>
+</div>
+
+<div class="flex" style="margin-top:10px;">
+<button onclick="markAttendance(${i})">Check-in</button>
+<span class="small">Visits: ${c.attendance.length}</span>
+</div>
+</div>`;
+});
+
+document.getElementById("total").innerText = total;
+document.getElementById("active").innerText = active;
+document.getElementById("expired").innerText = expired;
+document.getElementById("revenue").innerText = revenue;
 }
 
 render();
