@@ -3,136 +3,126 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Gym SaaS Pro</title>
+<title>Gym Ultra UI</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
+:root {
+  --bg:#050816;
+  --text:#fff;
+}
+
+.light {
+  --bg:#f1f5f9;
+  --text:#111;
+}
+
 body {
   margin:0;
-  font-family: Inter, Segoe UI;
-  background:#0b0f1a;
-  color:#e5e7eb;
+  font-family:Segoe UI;
+  background:var(--bg);
+  color:var(--text);
+  transition:0.3s;
 }
 
 /* Layout */
 .app { display:flex; height:100vh; }
 
+/* Sidebar */
 .sidebar {
-  width:220px;
-  background:#020617;
+  width:240px;
   padding:15px;
-  border-right:1px solid #1f2937;
+  backdrop-filter:blur(10px);
+}
+
+/* Animated border */
+.glow-border {
+  border:2px solid transparent;
+  background:linear-gradient(var(--bg),var(--bg)) padding-box,
+  linear-gradient(270deg,#00f0ff,#ff00ff,#00ff88) border-box;
+  background-size:300% 300%;
+  animation:move 6s infinite linear;
+}
+
+@keyframes move {
+  0%{background-position:0%}
+  100%{background-position:300%}
 }
 
 .sidebar h2 {
-  color:#38bdf8;
+  text-align:center;
 }
 
 .sidebar button {
   width:100%;
-  padding:10px;
-  margin:5px 0;
-  background:none;
+  padding:12px;
+  margin:6px 0;
+  background:rgba(255,255,255,0.05);
   border:none;
-  color:#cbd5f5;
-  text-align:left;
+  color:var(--text);
   cursor:pointer;
-  border-radius:6px;
-}
-
-.sidebar button:hover {
-  background:#1e293b;
+  border-radius:8px;
 }
 
 /* Main */
 .main { flex:1; display:flex; flex-direction:column; }
 
 .topbar {
-  padding:12px 20px;
-  border-bottom:1px solid #1f2937;
+  padding:12px;
   display:flex;
   justify-content:space-between;
 }
 
-.content {
-  padding:15px;
-  overflow:auto;
+/* Cards */
+.card {
+  padding:12px;
+  margin:10px;
+  border-radius:10px;
+  backdrop-filter:blur(10px);
+  background:rgba(255,255,255,0.05);
 }
 
-/* Dashboard cards */
+/* Grid */
 .grid {
   display:grid;
   grid-template-columns:repeat(4,1fr);
-  gap:10px;
-}
-
-.card {
-  background:#020617;
-  padding:12px;
-  border-radius:8px;
-  border:1px solid #1f2937;
-}
-
-.card p {
-  font-size:20px;
-  margin:5px 0;
 }
 
 /* Table */
 table {
   width:100%;
   border-collapse:collapse;
-  font-size:13px;
 }
 
-th, td {
+td, th {
   padding:8px;
-  border-bottom:1px solid #1f2937;
+  border-bottom:1px solid rgba(255,255,255,0.1);
 }
 
-th {
-  color:#9ca3af;
-  text-transform:uppercase;
-  font-size:11px;
+/* Inputs */
+input {
+  padding:6px;
+  margin:4px;
+  background:transparent;
+  border:1px solid rgba(255,255,255,0.3);
+  color:var(--text);
 }
-
-/* Badges */
-.badge {
-  padding:2px 6px;
-  border-radius:6px;
-  font-size:11px;
-}
-
-.green { background:#16a34a; }
-.red { background:#dc2626; }
-.yellow { background:#ca8a04; }
 
 /* Buttons */
 button.action {
   padding:4px 6px;
-  font-size:11px;
   border:none;
   border-radius:5px;
   cursor:pointer;
-  margin:1px;
 }
 
-.check { background:#22c55e; }
-.delete { background:#ef4444; }
+.check { background:#00ff88; }
+.delete { background:#ff004c; }
 
-/* Inputs */
-input, select {
-  padding:6px;
-  margin:3px;
-  background:#020617;
-  border:1px solid #1f2937;
-  color:white;
-  border-radius:5px;
-}
-
-/* Highlight row */
-tr:hover {
-  background:#111827;
+/* Chart */
+canvas {
+  width:100%;
+  height:200px;
 }
 </style>
 
@@ -142,116 +132,108 @@ tr:hover {
 
 <div class="app">
 
-<div class="sidebar">
-<h2>⚡ Gym</h2>
+<div class="sidebar glow-border">
+<h2>⚡ Gym UI</h2>
 <button onclick="show('dashboard')">Dashboard</button>
 <button onclick="show('clients')">Clients</button>
-<button onclick="show('workouts')">Workouts</button>
+<button onclick="toggleTheme()">🌗 Toggle Theme</button>
 </div>
 
 <div class="main">
-<div class="topbar">
-<div>Gym ERP</div>
-<div>Admin</div>
-</div>
+<div class="topbar">Ultra SaaS Panel</div>
 
-<div class="content" id="content"></div>
+<div id="content"></div>
 </div>
 
 </div>
 
 <script>
 
-let clients = JSON.parse(localStorage.getItem("gym_pro")) || [
-  {name:"Rahul",phone:"9876",fee:2000,expiry:new Date(Date.now()+5*86400000),attendance:2},
-  {name:"Arjun",phone:"9123",fee:1500,expiry:new Date(Date.now()-2*86400000),attendance:1},
-  {name:"Kiran",phone:"9000",fee:2500,expiry:new Date(Date.now()+1*86400000),attendance:3}
+/* Data */
+let clients = JSON.parse(localStorage.getItem("gym_ultra")) || [
+  {name:"Rahul",fee:2000,attendance:2},
+  {name:"Arjun",fee:1500,attendance:1},
+  {name:"Kiran",fee:2500,attendance:3}
 ];
 
 function save(){
-  localStorage.setItem("gym_pro", JSON.stringify(clients));
-}
-
-function status(exp){
-  let d=(new Date(exp)-new Date())/(1000*60*60*24);
-  if(d<0) return ["Expired","red"];
-  if(d<3) return ["Due","yellow"];
-  return ["Active","green"];
+localStorage.setItem("gym_ultra", JSON.stringify(clients));
 }
 
 /* Dashboard */
 function dashboard(){
-let revenue=clients.reduce((a,c)=>a+c.fee,0);
+let revenue = clients.reduce((a,c)=>a+c.fee,0);
+
+setTimeout(drawChart,100);
 
 return `
 <div class="grid">
-<div class="card">Clients<p>${clients.length}</p></div>
-<div class="card">Revenue<p>₹${revenue}</p></div>
-<div class="card">Expired<p>${clients.filter(c=>status(c.expiry)[0]=="Expired").length}</p></div>
-<div class="card">Today<p>${new Date().toLocaleDateString()}</p></div>
+<div class="card glow-border">Clients<br><b>${clients.length}</b></div>
+<div class="card glow-border">Revenue<br><b>₹${revenue}</b></div>
+</div>
+
+<div class="card glow-border">
+<h3>Revenue Chart</h3>
+<canvas id="chart"></canvas>
 </div>`;
 }
 
-/* Clients (Dense Table) */
-function clientsPage(){
-return `
-<h3>Add Client</h3>
-<input id="name" placeholder="Name">
-<input id="phone" placeholder="Phone">
-<input id="fee" type="number" placeholder="Fee">
-<input type="date" id="date">
-<button onclick="add()">Add</button>
+/* Chart */
+function drawChart(){
+let canvas = document.getElementById("chart");
+let ctx = canvas.getContext("2d");
 
-<h3>Clients</h3>
-<table>
-<tr>
-<th>Name</th><th>Phone</th><th>Fee</th><th>Expiry</th><th>Status</th><th>Visits</th><th>Actions</th>
-</tr>
+ctx.clearRect(0,0,canvas.width,canvas.height);
 
-${clients.map((c,i)=>{
-let [s,color]=status(c.expiry);
-return `
-<tr>
-<td>${c.name}</td>
-<td>${c.phone}</td>
-<td>₹${c.fee}</td>
-<td>${new Date(c.expiry).toLocaleDateString()}</td>
-<td><span class="badge ${color}">${s}</span></td>
-<td>${c.attendance}</td>
-<td>
-<button class="action check" onclick="checkin(${i})">✓</button>
-<button class="action delete" onclick="del(${i})">X</button>
-</td>
-</tr>`;
-}).join("")}
+ctx.beginPath();
+ctx.strokeStyle="#00f0ff";
+ctx.lineWidth=3;
 
-</table>`;
+let values = clients.map(c=>c.fee/100);
+values.forEach((v,i)=>{
+let x = i*80+20;
+let y = 150-v;
+if(i===0) ctx.moveTo(x,y);
+else ctx.lineTo(x,y);
+});
+
+ctx.stroke();
 }
 
-/* Workouts */
-function workoutsPage(){
+/* Clients */
+function clientsPage(){
 return `
-<h3>Workout Reference</h3>
-<div class="card">Chest → Bench, Incline, Fly, Pushups, Dips</div>
-<div class="card">Back → Pullups, Rows, Deadlift</div>
-<div class="card">Legs → Squats, Lunges, Press</div>`;
+<div class="card glow-border">
+<input id="name" placeholder="Name">
+<input id="fee" placeholder="Fee">
+<button onclick="add()">Add</button>
+</div>
+
+<div class="card glow-border">
+<table>
+<tr><th>Name</th><th>Fee</th><th>Visits</th><th></th></tr>
+${clients.map((c,i)=>`
+<tr>
+<td>${c.name}</td>
+<td>${c.fee}</td>
+<td>${c.attendance}</td>
+<td>
+<button class="action check" onclick="checkin(${i})">+</button>
+<button class="action delete" onclick="del(${i})">X</button>
+</td>
+</tr>
+`).join("")}
+</table>
+</div>`;
 }
 
 /* Actions */
 function add(){
-let name=name.value;
-let phone=phone.value;
-let fee=parseInt(fee.value);
-let date=date.value;
+let n=name.value;
+let f=parseInt(fee.value);
+if(!n||!f) return;
 
-if(!name||!fee) return;
-
-clients.push({
-name,phone,fee,
-expiry:new Date(date||Date.now()+30*86400000),
-attendance:0
-});
-
+clients.push({name:n,fee:f,attendance:0});
 save();
 show('clients');
 }
@@ -268,11 +250,15 @@ save();
 show('clients');
 }
 
+/* Theme */
+function toggleTheme(){
+document.body.classList.toggle("light");
+}
+
 /* Nav */
 function show(p){
 if(p=="dashboard") content.innerHTML=dashboard();
 if(p=="clients") content.innerHTML=clientsPage();
-if(p=="workouts") content.innerHTML=workoutsPage();
 }
 
 show('dashboard');
