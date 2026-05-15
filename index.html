@@ -1,41 +1,46 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Gym Manager Pro</title>
+<title>Gym ERP Prototype</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body {
-  margin:0;
-  font-family: 'Segoe UI', sans-serif;
-  background:#0f172a;
-  color:#fff;
-}
+body { margin:0; font-family:Segoe UI; display:flex; background:#0f172a; color:#fff; }
 
-.container {
-  max-width:1100px;
-  margin:auto;
+/* Sidebar */
+.sidebar {
+  width:240px;
+  background:#020617;
   padding:20px;
+  height:100vh;
+}
+.sidebar h2 { margin-bottom:20px; }
+.sidebar button {
+  width:100%; padding:12px;
+  margin:6px 0;
+  background:#1e293b;
+  border:none;
+  color:white;
+  cursor:pointer;
+  border-radius:8px;
 }
 
-h1 {
-  text-align:center;
-  margin-bottom:20px;
-}
-
-.grid {
-  display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
-  gap:15px;
-}
+/* Main */
+.main { flex:1; padding:20px; }
 
 .card {
   background:#1e293b;
   padding:15px;
   border-radius:12px;
-  box-shadow:0 4px 15px rgba(0,0,0,0.3);
+  margin-bottom:15px;
+}
+
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:10px;
 }
 
 input, select {
@@ -46,47 +51,29 @@ input, select {
   border:none;
 }
 
-button {
-  padding:8px 12px;
+button.action {
+  padding:6px 10px;
+  margin:3px;
   border:none;
-  border-radius:8px;
+  border-radius:6px;
   cursor:pointer;
-}
-
-.add-btn {
-  width:100%;
-  background:#22c55e;
-  color:white;
-  font-weight:bold;
-}
-
-.client {
-  background:#1e293b;
-  padding:12px;
-  border-radius:10px;
-  margin-top:10px;
-}
-
-.flex {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.badge {
-  padding:4px 10px;
-  border-radius:20px;
-  font-size:12px;
 }
 
 .green { background:#22c55e; }
 .red { background:#ef4444; }
 .yellow { background:#f59e0b; }
 
-.small { font-size:12px; color:#cbd5f5; }
+.badge {
+  padding:3px 8px;
+  border-radius:10px;
+  font-size:12px;
+}
 
-.actions button {
-  margin-left:5px;
+.client {
+  background:#020617;
+  padding:10px;
+  border-radius:10px;
+  margin-top:10px;
 }
 </style>
 
@@ -94,152 +81,142 @@ button {
 
 <body>
 
-<div class="container">
-<h1>🏋️ Gym Manager Pro</h1>
-
-<!-- Dashboard -->
-
-<div class="grid">
-<div class="card">Total Clients: <b id="total"></b></div>
-<div class="card">Active: <b id="active"></b></div>
-<div class="card">Expired: <b id="expired"></b></div>
-<div class="card">Revenue: ₹<b id="revenue"></b></div>
+<div class="sidebar">
+<h2>🏋️ Gym ERP</h2>
+<button onclick="show('dashboard')">Dashboard</button>
+<button onclick="show('clients')">Clients</button>
+<button onclick="show('attendance')">Attendance</button>
+<button onclick="show('payments')">Payments</button>
 </div>
 
-<!-- Add Client -->
-
-<div class="card">
-<h3>Add Client</h3>
-<input id="nameInput" placeholder="Name">
-<input id="phoneInput" placeholder="Phone">
-<select id="planInput">
-  <option value="30">Monthly</option>
-  <option value="90">3 Months</option>
-  <option value="365">Yearly</option>
-</select>
-<input id="feeInput" type="number" placeholder="Fee ₹">
-<button class="add-btn" onclick="addClient()">Add Client</button>
-</div>
-
-<!-- Search -->
-
-<div class="card">
-<input id="search" placeholder="Search client..." oninput="render()">
-</div>
-
-<!-- Clients -->
-
-<div class="card">
-<h3>Clients</h3>
-<div id="clients"></div>
-</div>
-
-</div>
+<div class="main" id="content"></div>
 
 <script>
-let clients = JSON.parse(localStorage.getItem("gym_clients")) || [];
+let clients = JSON.parse(localStorage.getItem("gym_proto")) || [];
 
 function save(){
-  localStorage.setItem("gym_clients", JSON.stringify(clients));
+  localStorage.setItem("gym_proto", JSON.stringify(clients));
 }
 
-function addClient(){
-  let name = document.getElementById("nameInput").value;
-  let phone = document.getElementById("phoneInput").value;
-  let plan = parseInt(document.getElementById("planInput").value);
-  let fee = parseInt(document.getElementById("feeInput").value);
-
-  if(!name || !fee){
-    alert("Enter required fields");
-    return;
-  }
-
-  let join = new Date();
-  let expiry = new Date();
-  expiry.setDate(join.getDate() + plan);
-
-  clients.push({
-    name, phone, fee,
-    expiry,
-    attendance:[]
-  });
-
-  save();
-  render();
-}
-
-function getStatus(expiry){
-  let now = new Date();
-  let exp = new Date(expiry);
-  let diff = (exp - now)/(1000*60*60*24);
-
-  if(diff < 0) return ["Expired","red"];
-  if(diff < 3) return ["Due Soon","yellow"];
+function status(exp){
+  let d = (new Date(exp)-new Date())/(1000*60*60*24);
+  if(d<0) return ["Expired","red"];
+  if(d<3) return ["Due","yellow"];
   return ["Active","green"];
 }
 
-function markAttendance(i){
-  let today = new Date().toDateString();
-  if(!clients[i].attendance.includes(today)){
-    clients[i].attendance.push(today);
-    save();
-    render();
-  }
+/* Dashboard */
+function dashboard(){
+let total = clients.length;
+let revenue = clients.reduce((a,c)=>a+c.fee,0);
+let expired = clients.filter(c=>status(c.expiry)[0]=="Expired").length;
+
+return `
+<h2>Dashboard</h2>
+<div class="grid">
+<div class="card">Clients<br><b>${total}</b></div>
+<div class="card">Revenue<br><b>₹${revenue}</b></div>
+<div class="card">Expired<br><b>${expired}</b></div>
+<div class="card">Today<br><b>${new Date().toLocaleDateString()}</b></div>
+</div>`;
 }
 
-function deleteClient(i){
-  if(confirm("Delete client?")){
-    clients.splice(i,1);
-    save();
-    render();
-  }
+/* Clients */
+function clientsPage(){
+return `
+<h2>Clients</h2>
+
+<div class="card">
+<input id="name" placeholder="Name">
+<input id="phone" placeholder="Phone">
+<select id="plan">
+<option value="30">Monthly</option>
+<option value="90">3 Months</option>
+<option value="365">Yearly</option>
+</select>
+<input id="fee" type="number" placeholder="Fee ₹">
+<button onclick="add()">Add Client</button>
+</div>
+
+<div class="card">
+${clients.map((c,i)=>{
+let [s,color]=status(c.expiry);
+return `
+<div class="client">
+<b>${c.name}</b> (${c.phone || "-"}) 
+<span class="badge ${color}">${s}</span><br>
+Expiry: ${new Date(c.expiry).toLocaleDateString()}<br>
+
+<button class="action green" onclick="checkin(${i})">Check-in</button>
+<button class="action red" onclick="del(${i})">Delete</button>
+
+<div style="font-size:12px;">Visits: ${c.attendance.length}</div>
+</div>`;
+}).join("")}
+</div>`;
 }
 
-function render(){
-  let list = document.getElementById("clients");
-  let search = document.getElementById("search").value.toLowerCase();
-
-  list.innerHTML = "";
-
-  let total=0, active=0, expired=0, revenue=0;
-
-  clients.forEach((c,i)=>{
-    if(!c.name.toLowerCase().includes(search)) return;
-
-    total++;
-    revenue += c.fee;
-
-    let [status,color] = getStatus(c.expiry);
-    if(status==="Expired") expired++; else active++;
-
-    list.innerHTML += `
-    <div class="client">
-      <div class="flex">
-        <div>
-          <b>${c.name}</b><br>
-          <span class="small">${c.phone || ""}</span><br>
-          <span class="small">Expiry: ${new Date(c.expiry).toLocaleDateString()}</span>
-        </div>
-        <span class="badge ${color}">${status}</span>
-      </div>
-
-      <div class="flex actions" style="margin-top:10px;">
-        <div>
-          <button onclick="markAttendance(${i})">Check-in</button>
-          <button onclick="deleteClient(${i})" style="background:#ef4444;color:white;">Delete</button>
-        </div>
-        <span class="small">Visits: ${c.attendance.length}</span>
-      </div>
-    </div>`;
-  });
-
-  document.getElementById("total").innerText = total;
-  document.getElementById("active").innerText = active;
-  document.getElementById("expired").innerText = expired;
-  document.getElementById("revenue").innerText = revenue;
+/* Attendance */
+function attendancePage(){
+return `
+<h2>Attendance</h2>
+<div class="card">
+${clients.map(c=>`${c.name} → ${c.attendance.length} visits<br>`).join("")}
+</div>`;
 }
 
-render();
+/* Payments */
+function paymentsPage(){
+return `
+<h2>Payments</h2>
+<div class="card">
+${clients.map(c=>`${c.name} → ₹${c.fee} → ${new Date(c.expiry).toLocaleDateString()}<br>`).join("")}
+</div>`;
+}
+
+/* Actions */
+function add(){
+let name = document.getElementById("name").value;
+let phone = document.getElementById("phone").value;
+let plan = parseInt(document.getElementById("plan").value);
+let fee = parseInt(document.getElementById("fee").value);
+
+if(!name || !fee) return alert("Enter details");
+
+let exp = new Date();
+exp.setDate(exp.getDate()+plan);
+
+clients.push({name,phone,fee,expiry:exp,attendance:[]});
+save();
+show('clients');
+}
+
+function checkin(i){
+clients[i].attendance.push(new Date().toDateString());
+save();
+show('clients');
+}
+
+function del(i){
+if(confirm("Delete?")){
+clients.splice(i,1);
+save();
+show('clients');
+}
+}
+
+/* Nav */
+function show(p){
+let html="";
+if(p=="dashboard") html=dashboard();
+if(p=="clients") html=clientsPage();
+if(p=="attendance") html=attendancePage();
+if(p=="payments") html=paymentsPage();
+
+document.getElementById("content").innerHTML=html;
+}
+
+show('dashboard');
 </script>
 
 </body>
