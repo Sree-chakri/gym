@@ -9,24 +9,22 @@
 <style>
 body {
   margin:0;
-  font-family: Inter, Segoe UI;
-  background:#0b0f1a;
+  font-family: Segoe UI;
+  background: linear-gradient(135deg,#020617,#1e1b4b,#0f172a);
   color:#e5e7eb;
 }
 
-/* Layout */
 .app { display:flex; height:100vh; }
 
 .sidebar {
   width:220px;
   background:#020617;
   padding:15px;
-  border-right:1px solid #1f2937;
+  border-right:3px solid #00f0ff;
+  box-shadow:0 0 15px #00f0ff;
 }
 
-.sidebar h2 {
-  color:#38bdf8;
-}
+.sidebar h2 { color:#38bdf8; }
 
 .sidebar button {
   width:100%;
@@ -44,22 +42,16 @@ body {
   background:#1e293b;
 }
 
-/* Main */
 .main { flex:1; display:flex; flex-direction:column; }
 
 .topbar {
   padding:12px 20px;
-  border-bottom:1px solid #1f2937;
-  display:flex;
-  justify-content:space-between;
+  border-bottom:2px solid #22c55e;
+  box-shadow:0 0 10px #22c55e;
 }
 
-.content {
-  padding:15px;
-  overflow:auto;
-}
+.content { padding:15px; overflow:auto; }
 
-/* Dashboard cards */
 .grid {
   display:grid;
   grid-template-columns:repeat(4,1fr);
@@ -71,14 +63,11 @@ body {
   padding:12px;
   border-radius:8px;
   border:1px solid #1f2937;
+  box-shadow:0 0 10px #38bdf8;
 }
 
-.card p {
-  font-size:20px;
-  margin:5px 0;
-}
+.card p { font-size:20px; }
 
-/* Table */
 table {
   width:100%;
   border-collapse:collapse;
@@ -90,15 +79,10 @@ th, td {
   border-bottom:1px solid #1f2937;
 }
 
-th {
-  color:#9ca3af;
-  text-transform:uppercase;
-  font-size:11px;
-}
+th { color:#38bdf8; }
 
-/* Badges */
 .badge {
-  padding:2px 6px;
+  padding:3px 6px;
   border-radius:6px;
   font-size:11px;
 }
@@ -107,7 +91,6 @@ th {
 .red { background:#dc2626; }
 .yellow { background:#ca8a04; }
 
-/* Buttons */
 button.action {
   padding:4px 6px;
   font-size:11px;
@@ -120,20 +103,16 @@ button.action {
 .check { background:#22c55e; }
 .delete { background:#ef4444; }
 
-/* Inputs */
 input, select {
   padding:6px;
   margin:3px;
-  background:#020617;
+  background:#97c7fc;
   border:1px solid #1f2937;
   color:white;
   border-radius:5px;
 }
 
-/* Highlight row */
-tr:hover {
-  background:#111827;
-}
+tr:hover { background:#111827; }
 </style>
 
 </head>
@@ -147,14 +126,11 @@ tr:hover {
 <button onclick="show('dashboard')">Dashboard</button>
 <button onclick="show('clients')">Clients</button>
 <button onclick="show('workouts')">Workouts</button>
+<button onclick="show('nutrition')">Nutrition</button>
 </div>
 
 <div class="main">
-<div class="topbar">
-<div>Gym ERP</div>
-<div>Admin</div>
-</div>
-
+<div class="topbar">Gym ERP</div>
 <div class="content" id="content"></div>
 </div>
 
@@ -192,7 +168,7 @@ return `
 </div>`;
 }
 
-/* Clients (Dense Table) */
+/* Clients */
 function clientsPage(){
 return `
 <h3>Add Client</h3>
@@ -231,10 +207,45 @@ return `
 /* Workouts */
 function workoutsPage(){
 return `
-<h3>Workout Reference</h3>
-<div class="card">Chest → Bench, Incline, Fly, Pushups, Dips</div>
-<div class="card">Back → Pullups, Rows, Deadlift</div>
-<div class="card">Legs → Squats, Lunges, Press</div>`;
+<h3>Workout Programs</h3>
+
+<div class="card"><b>Chest</b><br>
+Bench Press, Incline DB Press, Decline Press, Fly, Pushups, Dips</div>
+
+<div class="card"><b>Back</b><br>
+Pull-ups, Lat Pulldown, Barbell Row, Seated Row, Deadlift, Face Pull</div>
+
+<div class="card"><b>Legs</b><br>
+Squats, Leg Press, Lunges, Curl, Extension, Calf Raises</div>
+
+<div class="card"><b>Shoulders</b><br>
+Overhead Press, Lateral Raise, Front Raise, Rear Delt Fly, Shrugs</div>
+
+<div class="card"><b>Arms</b><br>
+Curl, Hammer Curl, Preacher Curl, Pushdown, Skull Crushers, Dips</div>
+
+<div class="card"><b>Core</b><br>
+Plank, Leg Raises, Crunches, Russian Twist, Hanging Knee Raise</div>
+`;
+}
+
+/* Nutrition */
+function nutritionPage(){
+return `
+<h3>Nutrition Plans</h3>
+
+<div class="card"><b>Muscle Gain</b><br>
+High protein, rice/oats, nuts, 5 meals/day</div>
+
+<div class="card"><b>Fat Loss</b><br>
+Calorie deficit, high protein, avoid sugar</div>
+
+<div class="card"><b>General Fitness</b><br>
+Balanced diet, hydration 3–4L</div>
+
+<div class="card"><b>Pre/Post Workout</b><br>
+Banana + coffee / Protein + carbs</div>
+`;
 }
 
 /* Actions */
@@ -273,6 +284,7 @@ function show(p){
 if(p=="dashboard") content.innerHTML=dashboard();
 if(p=="clients") content.innerHTML=clientsPage();
 if(p=="workouts") content.innerHTML=workoutsPage();
+if(p=="nutrition") content.innerHTML=nutritionPage();
 }
 
 show('dashboard');
