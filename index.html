@@ -9,76 +9,90 @@
 <style>
 body {
   margin:0;
-  font-family:Segoe UI;
+  font-family: Inter, Segoe UI;
   display:flex;
-  background:linear-gradient(135deg,#020617,#0f172a);
+  background: linear-gradient(135deg,#020617,#1e1b4b);
   color:#e2e8f0;
 }
 
 /* Sidebar */
 .sidebar {
   width:240px;
-  background:rgba(15,23,42,0.9);
-  backdrop-filter: blur(10px);
+  background:rgba(2,6,23,0.85);
+  backdrop-filter: blur(12px);
   padding:20px;
   height:100vh;
   border-right:1px solid rgba(255,255,255,0.05);
 }
 
-.sidebar h2 { color:#38bdf8; }
+.sidebar h2 {
+  background:linear-gradient(90deg,#38bdf8,#a78bfa);
+  -webkit-background-clip:text;
+  color:transparent;
+}
 
 .sidebar button {
   width:100%;
   padding:12px;
   margin:6px 0;
   background:transparent;
-  border:1px solid rgba(255,255,255,0.1);
-  color:white;
+  border:1px solid rgba(255,255,255,0.08);
+  color:#cbd5f5;
   cursor:pointer;
-  border-radius:8px;
+  border-radius:10px;
   transition:0.2s;
 }
 
 .sidebar button:hover {
-  background:#38bdf8;
+  background:linear-gradient(90deg,#38bdf8,#a78bfa);
   color:black;
 }
 
 /* Main */
 .main { flex:1; padding:20px; }
 
+/* Cards */
 .card {
-  background:rgba(30,41,59,0.6);
-  backdrop-filter: blur(12px);
-  padding:15px;
-  border-radius:12px;
+  background:rgba(30,41,59,0.5);
+  backdrop-filter: blur(14px);
+  padding:16px;
+  border-radius:14px;
   margin-bottom:15px;
-  border:1px solid rgba(255,255,255,0.05);
-  box-shadow:0 0 20px rgba(56,189,248,0.1);
+  border:1px solid rgba(255,255,255,0.06);
+  box-shadow:0 0 25px rgba(167,139,250,0.08);
 }
 
 .grid {
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:10px;
+  gap:12px;
 }
 
+.stat {
+  font-size:22px;
+  font-weight:bold;
+  margin-top:5px;
+}
+
+/* Inputs */
 input, select {
   width:100%;
   padding:10px;
   margin:6px 0;
-  border-radius:8px;
+  border-radius:10px;
   border:none;
   background:#020617;
   color:white;
 }
 
+/* Buttons */
 button.action {
   padding:6px 10px;
   margin:3px;
   border:none;
-  border-radius:6px;
+  border-radius:8px;
   cursor:pointer;
+  font-size:12px;
 }
 
 .green { background:#22c55e; }
@@ -86,17 +100,24 @@ button.action {
 .yellow { background:#f59e0b; }
 
 .badge {
-  padding:3px 8px;
-  border-radius:10px;
-  font-size:12px;
+  padding:4px 10px;
+  border-radius:20px;
+  font-size:11px;
 }
 
+/* Client card */
 .client {
-  background:#020617;
+  background:rgba(2,6,23,0.9);
   padding:12px;
-  border-radius:10px;
+  border-radius:12px;
   margin-top:10px;
   border:1px solid rgba(255,255,255,0.05);
+  transition:0.2s;
+}
+
+.client:hover {
+  transform:translateY(-2px);
+  box-shadow:0 0 15px rgba(56,189,248,0.2);
 }
 </style>
 
@@ -119,35 +140,15 @@ button.action {
 
 /* SAMPLE DATA */
 let clients = JSON.parse(localStorage.getItem("gym_proto")) || [
-  {
-    name:"Rahul",
-    phone:"9876543210",
-    fee:2000,
-    expiry:new Date(Date.now()+5*86400000),
-    attendance:["Mon","Tue"]
-  },
-  {
-    name:"Arjun",
-    phone:"9123456780",
-    fee:1500,
-    expiry:new Date(Date.now()-2*86400000),
-    attendance:["Mon"]
-  },
-  {
-    name:"Kiran",
-    phone:"9000000000",
-    fee:2500,
-    expiry:new Date(Date.now()+1*86400000),
-    attendance:["Mon","Tue","Wed"]
-  }
+  {name:"Rahul",phone:"9876543210",fee:2000,expiry:new Date(Date.now()+5*86400000),attendance:["Mon","Tue"]},
+  {name:"Arjun",phone:"9123456780",fee:1500,expiry:new Date(Date.now()-2*86400000),attendance:["Mon"]},
+  {name:"Kiran",phone:"9000000000",fee:2500,expiry:new Date(Date.now()+1*86400000),attendance:["Mon","Tue","Wed"]}
 ];
 
-function save(){
-  localStorage.setItem("gym_proto", JSON.stringify(clients));
-}
+function save(){ localStorage.setItem("gym_proto", JSON.stringify(clients)); }
 
 function status(exp){
-  let d = (new Date(exp)-new Date())/(1000*60*60*24);
+  let d=(new Date(exp)-new Date())/(1000*60*60*24);
   if(d<0) return ["Expired","red"];
   if(d<3) return ["Due","yellow"];
   return ["Active","green"];
@@ -155,17 +156,17 @@ function status(exp){
 
 /* Dashboard */
 function dashboard(){
-let total = clients.length;
-let revenue = clients.reduce((a,c)=>a+c.fee,0);
-let expired = clients.filter(c=>status(c.expiry)[0]=="Expired").length;
+let total=clients.length;
+let revenue=clients.reduce((a,c)=>a+c.fee,0);
+let expired=clients.filter(c=>status(c.expiry)[0]=="Expired").length;
 
 return `
 <h2>Dashboard</h2>
 <div class="grid">
-<div class="card">Clients<br><b>${total}</b></div>
-<div class="card">Revenue<br><b>₹${revenue}</b></div>
-<div class="card">Expired<br><b>${expired}</b></div>
-<div class="card">Today<br><b>${new Date().toLocaleDateString()}</b></div>
+<div class="card">Clients<div class="stat">${total}</div></div>
+<div class="card">Revenue<div class="stat">₹${revenue}</div></div>
+<div class="card">Expired<div class="stat">${expired}</div></div>
+<div class="card">Today<div class="stat">${new Date().toLocaleDateString()}</div></div>
 </div>`;
 }
 
@@ -183,10 +184,9 @@ return `
 <option value="365">Yearly</option>
 </select>
 
-<label>Custom Expiry</label>
 <input type="date" id="customDate">
-
 <input id="fee" type="number" placeholder="Fee ₹">
+
 <button onclick="add()">Add Client</button>
 </div>
 
@@ -208,56 +208,39 @@ Expiry: ${new Date(c.expiry).toLocaleDateString()}<br>
 </div>`;
 }
 
-/* Attendance */
+/* Other Pages */
 function attendancePage(){
-return `
-<h2>Attendance</h2>
-<div class="card">
+return `<h2>Attendance</h2><div class="card">
 ${clients.map(c=>`${c.name} → ${c.attendance.length} visits<br>`).join("")}
 </div>`;
 }
 
-/* Payments */
 function paymentsPage(){
-return `
-<h2>Payments</h2>
-<div class="card">
+return `<h2>Payments</h2><div class="card">
 ${clients.map(c=>`${c.name} → ₹${c.fee} → ${new Date(c.expiry).toLocaleDateString()}<br>`).join("")}
 </div>`;
 }
 
-/* Workouts */
 function workoutsPage(){
-return `
-<h2>Workouts</h2>
-
-<div class="card"><b>Chest</b><br>
-Bench Press, Incline Press, Fly, Pushups, Dips</div>
-
-<div class="card"><b>Back</b><br>
-Pull-ups, Rows, Deadlift, Lat Pulldown, Cable Row</div>
-
-<div class="card"><b>Legs</b><br>
-Squats, Lunges, Leg Press, Curl, Calf Raise</div>
-
-<div class="card"><b>Shoulders</b><br>
-Press, Lateral Raise, Front Raise, Rear Fly, Shrugs</div>
-
-<div class="card"><b>Arms</b><br>
-Curls, Hammer, Pushdown, Skull Crushers, Dips</div>`;
+return `<h2>Workouts</h2>
+<div class="card">Chest → Bench, Incline, Fly, Pushups, Dips</div>
+<div class="card">Back → Pullups, Rows, Deadlift, Lat Pulldown</div>
+<div class="card">Legs → Squats, Lunges, Press, Curl, Calf</div>
+<div class="card">Shoulders → Press, Lateral, Front, Rear, Shrugs</div>
+<div class="card">Arms → Curl, Hammer, Pushdown, Skull</div>`;
 }
 
 /* Actions */
 function add(){
-let name = document.getElementById("name").value;
-let phone = document.getElementById("phone").value;
-let plan = parseInt(document.getElementById("plan").value);
-let fee = parseInt(document.getElementById("fee").value);
-let customDate = document.getElementById("customDate").value;
+let name=document.getElementById("name").value;
+let phone=document.getElementById("phone").value;
+let plan=parseInt(document.getElementById("plan").value);
+let fee=parseInt(document.getElementById("fee").value);
+let custom=document.getElementById("customDate").value;
 
-if(!name || !fee) return alert("Enter details");
+if(!name||!fee) return alert("Enter details");
 
-let exp = customDate ? new Date(customDate) : new Date(Date.now()+plan*86400000);
+let exp=custom?new Date(custom):new Date(Date.now()+plan*86400000);
 
 clients.push({name,phone,fee,expiry:exp,attendance:[]});
 save();
@@ -271,11 +254,9 @@ show('clients');
 }
 
 function del(i){
-if(confirm("Delete?")){
 clients.splice(i,1);
 save();
 show('clients');
-}
 }
 
 /* Nav */
