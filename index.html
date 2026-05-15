@@ -8,33 +8,18 @@
 
 <style>
 body { margin:0; font-family:Segoe UI; display:flex; background:#0f172a; color:#fff; }
-
-/* Sidebar */
-.sidebar {
-  width:240px;
-  background:#020617;
-  padding:20px;
-  height:100vh;
-}
+.sidebar { width:240px; background:#020617; padding:20px; height:100vh; }
 .sidebar h2 { margin-bottom:20px; }
 .sidebar button {
-  width:100%; padding:12px;
-  margin:6px 0;
-  background:#1e293b;
-  border:none;
-  color:white;
-  cursor:pointer;
-  border-radius:8px;
+  width:100%; padding:12px; margin:6px 0;
+  background:#1e293b; border:none; color:white;
+  cursor:pointer; border-radius:8px;
 }
-
-/* Main */
 .main { flex:1; padding:20px; }
 
 .card {
-  background:#1e293b;
-  padding:15px;
-  border-radius:12px;
-  margin-bottom:15px;
+  background:#1e293b; padding:15px;
+  border-radius:12px; margin-bottom:15px;
 }
 
 .grid {
@@ -44,19 +29,13 @@ body { margin:0; font-family:Segoe UI; display:flex; background:#0f172a; color:#
 }
 
 input, select {
-  width:100%;
-  padding:10px;
-  margin:6px 0;
-  border-radius:8px;
-  border:none;
+  width:100%; padding:10px; margin:6px 0;
+  border-radius:8px; border:none;
 }
 
 button.action {
-  padding:6px 10px;
-  margin:3px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
+  padding:6px 10px; margin:3px;
+  border:none; border-radius:6px; cursor:pointer;
 }
 
 .green { background:#22c55e; }
@@ -87,6 +66,7 @@ button.action {
 <button onclick="show('clients')">Clients</button>
 <button onclick="show('attendance')">Attendance</button>
 <button onclick="show('payments')">Payments</button>
+<button onclick="show('workouts')">Workouts</button>
 </div>
 
 <div class="main" id="content"></div>
@@ -129,11 +109,16 @@ return `
 <div class="card">
 <input id="name" placeholder="Name">
 <input id="phone" placeholder="Phone">
+
 <select id="plan">
 <option value="30">Monthly</option>
 <option value="90">3 Months</option>
 <option value="365">Yearly</option>
 </select>
+
+<label>OR Select Custom Expiry Date</label>
+<input type="date" id="customDate">
+
 <input id="fee" type="number" placeholder="Fee ₹">
 <button onclick="add()">Add Client</button>
 </div>
@@ -174,17 +159,50 @@ ${clients.map(c=>`${c.name} → ₹${c.fee} → ${new Date(c.expiry).toLocaleDat
 </div>`;
 }
 
+/* Workouts */
+function workoutsPage(){
+return `
+<h2>Workout Plans</h2>
+
+<div class="card"><b>Chest</b><br>
+Bench Press<br>Incline Press<br>Chest Fly<br>Push-ups<br>Dips
+</div>
+
+<div class="card"><b>Back</b><br>
+Pull-ups<br>Lat Pulldown<br>Barbell Row<br>Deadlift<br>Seated Row
+</div>
+
+<div class="card"><b>Legs</b><br>
+Squats<br>Lunges<br>Leg Press<br>Hamstring Curl<br>Calf Raises
+</div>
+
+<div class="card"><b>Shoulders</b><br>
+Overhead Press<br>Lateral Raise<br>Front Raise<br>Rear Delt Fly<br>Shrugs
+</div>
+
+<div class="card"><b>Arms</b><br>
+Bicep Curl<br>Hammer Curl<br>Tricep Pushdown<br>Skull Crushers<br>Dips
+</div>`;
+}
+
 /* Actions */
 function add(){
 let name = document.getElementById("name").value;
 let phone = document.getElementById("phone").value;
 let plan = parseInt(document.getElementById("plan").value);
 let fee = parseInt(document.getElementById("fee").value);
+let customDate = document.getElementById("customDate").value;
 
 if(!name || !fee) return alert("Enter details");
 
-let exp = new Date();
-exp.setDate(exp.getDate()+plan);
+let exp;
+
+if(customDate){
+  exp = new Date(customDate);
+} else {
+  exp = new Date();
+  exp.setDate(exp.getDate()+plan);
+}
 
 clients.push({name,phone,fee,expiry:exp,attendance:[]});
 save();
@@ -212,6 +230,7 @@ if(p=="dashboard") html=dashboard();
 if(p=="clients") html=clientsPage();
 if(p=="attendance") html=attendancePage();
 if(p=="payments") html=paymentsPage();
+if(p=="workouts") html=workoutsPage();
 
 document.getElementById("content").innerHTML=html;
 }
